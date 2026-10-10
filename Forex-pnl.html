@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forex P&L · Price / Pip / % · R:R · Lv</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: linear-gradient(145deg, #0b1a2e 0%, #1c2f44 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 1.5rem;
+        }
+        .card {
+            background: rgba(22, 38, 54, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(80, 180, 255, 0.25);
+            border-radius: 2.5rem;
+            padding: 2.5rem 2rem;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 200, 255, 0.1) inset;
+        }
+        h1 {
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+            font-size: 2.2rem;
+            letter-spacing: -0.01em;
+            background: linear-gradient(135deg, #ffffff, #9dd0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        h1 span {
+            font-size: 1.6rem;
+            opacity: 0.8;
+            background: #0b1a2e;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            border: 1px solid #2f5b7a;
+            -webkit-text-fill-color: #9dd0ff;
+        }
+        .subhead {
+            color: #8faec9;
+            margin-bottom: 2rem;
+            font-weight: 400;
+            font-size: 1rem;
+            border-left: 3px solid #2a8ccc;
+            padding-left: 1rem;
+        }
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: #7fa8c7;
+            margin: 1.5rem 0 0.8rem 0;
+            border-bottom: 1px solid #1e3649;
+            padding-bottom: 0.4rem;
+        }
+        .section-title:first-of-type {
+            margin-top: 0;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+        .field label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            font-weight: 600;
+            color: #a3c1db;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .field label i {
+            font-style: normal;
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        .field input, .field select {
+            background: #0e1f2e;
+            border: 1.5px solid #2a455c;
+            border-radius: 1.25rem;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #eef7ff;
+            outline: none;
+            transition: 0.2s;
+            width: 100%;
+            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+        }
+        .field input:focus, .field select:focus {
+            border-color: #3d9be0;
+            box-shadow: 0 0 0 3px rgba(61, 155, 224, 0.25);
+            background: #102433;
+        }
+        .field input::placeholder {
+            color: #4e6f8a;
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+        .tpsl-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .tpsl-block {
+            background: #0d1f2f;
+            border-radius: 1.8rem;
+            padding: 1.2rem 1.2rem 1rem 1.2rem;
+            border: 1px solid #1f3e52;
+        }
+        .tpsl-block h3 {
+            margin: 0 0 0.8rem 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #b6d4ee;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .tpsl-row {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            align-items: center;
+        }
+        .tpsl-row select {
+            background: #0e1f2e;
+            border: 1.5px solid #2a455c;
+            border-radius: 1rem;
+            padding: 0.6rem 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #eef7ff;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            flex: 0 0 auto;
+            width: 130px;
+        }
+        .tpsl-row input {
+            background: #0e1f2e;
+            border: 1.5px solid #2a455c;
+            border-radius: 1rem;
+            padding: 0.6rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #eef7ff;
+            outline: none;
+            font-family: 'JetBrains Mono', monospace;
+            flex: 1;
+            width: 100%;
+        }
+        .tpsl-row input:focus, .tpsl-row select:focus {
+            border-color: #3d9be0;
+            box-shadow: 0 0 0 3px rgba(61, 155, 224, 0.25);
+            background: #102433;
+        }
+        .tpsl-hint {
+            font-size: 0.7rem;
+            color: #5b7d98;
+            margin-top: -0.3rem;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+        .lv-row {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #102b3b;
+            border-radius: 1.5rem;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid #2e6688;
+            margin-top: 0.5rem;
+        }
+        .lv-row label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #bbdefa;
+            white-space: nowrap;
+        }
+        .lv-row input {
+            background: #0b1a2e;
+            border: 1.5px solid #2a5b7a;
+            border-radius: 2rem;
+            padding: 0.7rem 1.2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #d9efff;
+            max-width: 140px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .pnl-section {
+            background: #0b1b29;
+            border-radius: 2rem;
+            padding: 1.5rem 1.5rem;
+            margin-top: 1.5rem;
+            border: 1px solid #223d52;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+        }
+        .pnl-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .pnl-header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #b6d4ee;
+        }
+        .badge-group {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .badge {
+            background: #162f41;
+            border-radius: 50px;
+            padding: 0.35rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #7bb9e0;
+            border: 1px solid #2f6180;
+            white-space: nowrap;
+        }
+        .badge.rr {
+            background: #1a3f2e;
+            color: #7fe0b0;
+            border-color: #2e7a5a;
+        }
+        .pnl-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        .pnl-card {
+            background: #0e1f2e;
+            border-radius: 1.2rem;
+            padding: 0.9rem 0.4rem;
+            text-align: center;
+            border: 1px solid #1f3e52;
+            transition: 0.2s;
+        }
+        .pnl-card .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+            color: #6c93b0;
+            margin-bottom: 0.3rem;
+        }
+        .pnl-card .value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.2;
+            word-break: break-word;
+            color: #dfefff;
+        }
+        .pnl-card .sub {
+            font-size: 0.65rem;
+            color: #5b7d98;
+            margin-top: 0.15rem;
+            font-weight: 500;
+        }
+        .profit {
+            color: #66e0a3 !important;
+        }
+        .loss {
+            color: #ff7b7b !important;
+        }
+        .neutral {
+            color: #b0c9e0 !important;
+        }
+        .value.profit, .value.loss {
+            text-shadow: 0 0 12px currentColor;
+        }
+        .row-label {
+            grid-column: span 5;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #7fa8c7;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 0.8rem;
+            padding-left: 0.3rem;
+            border-bottom: 1px solid #1e3649;
+            padding-bottom: 0.3rem;
+        }
+        .footnote {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #628aa8;
+            border-top: 1px solid #1c3649;
+            padding-top: 1rem;
+        }
+        .pip-note {
+            background: #102433;
+            border-radius: 40px;
+            padding: 0.25rem 1rem;
+            border: 1px dashed #2a5c7a;
+        }
+        @media (max-width: 750px) {
+            .input-grid { grid-template-columns: 1fr 1fr; }
+            .tpsl-group { grid-template-columns: 1fr; }
+            .pnl-grid { grid-template-columns: 1fr 1fr; }
+            .row-label { grid-column: span 2; }
+        }
+        @media (max-width: 480px) {
+            .card { padding: 1.5rem 1rem; }
+            .input-grid { grid-template-columns: 1fr; }
+            .pnl-grid { grid-template-columns: 1fr; }
+            .row-label { grid-column: span 1; }
+            .lv-row { flex-wrap: wrap; }
+            .tpsl-row { flex-wrap: wrap; }
+            .tpsl-row select { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>
+            📊 P&L Analyser 
+            <span>FX</span>
+        </h1>
+        <div class="subhead">
+            Enter TP & SL as <strong>price</strong>, <strong>pip distance</strong>, or <strong>% move</strong>. See P&L in pips, points, $, %, and <strong>R:R</strong>.
+        </div>
+
+        <!-- ===== BASIC INPUTS ===== -->
+        <div class="section-title">⚙️ Trade setup</div>
+        <div class="input-grid">
+            <div class="field">
+                <label><i>⚖️</i> Lot size</label>
+                <input type="number" id="lotSize" value="0.10" step="0.01" min="0.01" placeholder="0.10">
+            </div>
+            <div class="field">
+                <label><i>🎯</i> Entry price</label>
+                <input type="number" id="entryPrice" value="1.0850" step="0.00001" placeholder="1.0850">
+            </div>
+            <div class="field">
+                <label><i>💱</i> Instrument</label>
+                <select id="pairType">
+                    <option value="standard" selected>Standard (EURUSD) · pip 0.0001</option>
+                    <option value="jpy">JPY pair · pip 0.01</option>
+                    <option value="xau">Gold (XAUUSD) · pip 0.1</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ===== TP & SL ===== -->
+        <div class="section-title">🚀 Take Profit &nbsp;·&nbsp; 🛑 Stop Loss</div>
+        <div class="tpsl-group">
+            <!-- TAKE PROFIT BLOCK -->
+            <div class="tpsl-block">
+                <h3>✅ Take Profit</h3>
+                <div class="tpsl-row">
+                    <select id="tpMode">
+                        <option value="price" selected>Price</option>
+                        <option value="pip">Pip distance</option>
+                        <option value="percent">% move</option>
+                    </select>
+                    <input type="number" id="tpValue" value="1.0900" step="0.00001" placeholder="Value">
+                </div>
+                <div class="tpsl-hint" id="tpHint">Enter target price (e.g. 1.0900)</div>
+            </div>
+            <!-- STOP LOSS BLOCK -->
+            <div class="tpsl-block">
+                <h3>🛑 Stop Loss</h3>
+                <div class="tpsl-row">
+                    <select id="slMode">
+                        <option value="price" selected>Price</option>
+                        <option value="pip">Pip distance</option>
+                        <option value="percent">% move</option>
+                    </select>
+                    <input type="number" id="slValue" value="1.0820" step="0.00001" placeholder="Value">
+                </div>
+                <div class="tpsl-hint" id="slHint">Enter stop price (e.g. 1.0820)</div>
+            </div>
+        </div>
+
+        <!-- ===== LEVERAGE ===== -->
+        <div class="lv-row">
+            <label>🔢 Leverage (Lv)</label>
+            <input type="number" id="leverage" value="100" step="1" min="1" placeholder="100">
+            <span style="font-size:0.8rem; color:#7fa8c7;">Used for % with Lv</span>
+        </div>
+
+        <!-- ===== P&L OUTPUT ===== -->
+        <div class="pnl-section">
+            <div class="pnl-header">
+                <h2>🔍 Trade result</h2>
+                <div class="badge-group">
+                    <div class="badge" id="directionBadge">LONG / SHORT</div>
+                    <div class="badge rr" id="rrBadge">R:R —</div>
+                </div>
+            </div>
+
+            <!-- TP ROW -->
+            <div class="row-label">✅ TAKE PROFIT (TP)</div>
+            <div class="pnl-grid">
+                <div class="pnl-card">
+                    <div class="label">Pips</div>
+                    <div class="value" id="tpPips">—</div>
+                    <div class="sub">1 pip = 10 pts</div>
+                </div>
+                <div class="pnl-card">
+                    <div class="label">Points</div>
+                    <div class="value" id="tpPoints">—</div>
+                    <div class="sub">points</div>
+                </div>
+                <div class="pnl-card">
+                    <div class="label">USD</div>
+                    <div class="value" id="tpUsd">—</div>
+                    <div class="sub">profit</div>
+                </div>
+                <div class="pnl-card">
+                    <div class="label">% (no Lv)</div>
+                    <div class="value" id="tpPctNoLv">—</div>
+                    <div class="sub">on notional</div>
+                </div>
+                <div class="pnl-card">
+                    <div class="label">% (with Lv)</div>
+                    <div class="value" id="tpPctWithLv">—</div>
+                    <div class="sub">on margin</div>
+                </div>
+            </div>
+
+            <!-- SL ROW -->
+            <div class="row-label" style="margin-top: 1.2rem;">🛑 STOP LOSS (SL)</div>
+            <div class="pnl-grid">
+                <div class="pnl-card">
+                    <div class="label">Pips</div>
+                    <div class="value" id="slPips">—</div>
+                    <div class="sub">1 pip = 10 pts</div>
+                </div>
+                <div class="pnl-card">
+                    <div class="label">Points</div>
+                    <div class="value" id="slPoints">—</div>
+                    <div class="sub">points</div>
+                </div>
+                <div class="pnl-card">
+                    <div class="label">USD</div>
+                    <div class="value" id="slUsd">—</div>
+                    <div class="sub">loss</div>
+                </div>
+                <div class="pnl-card">
+                    <div class="label">% (no Lv)</div>
+                    <div class="value" id="slPctNoLv">—</div>
+                    <div class="sub">on notional</div>
+                </div>
+                <div class="pnl-card">
+                    <div class="label">% (with Lv)</div>
+                    <div class="value" id="slPctWithLv">—</div>
+                    <div class="sub">on margin</div>
+                </div>
+            </div>
+        </div>
+        <div class="footnote">
+            <span>📐 Pip value: $10 per pip per 1.0 lot · % based on notional / leverage · R:R = TP pips ÷ SL pips</span>
+            <span class="pip-note">✨ TP/SL as price, pip or %</span>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ----- DOM refs -----
+            const lotInput = document.getElementById('lotSize');
+            const entryInput = document.getElementById('entryPrice');
+            const pairSelect = document.getElementById('pairType');
+            const leverageInput = document.getElementById('leverage');
+
+            // TP elements
+            const tpMode = document.getElementById('tpMode');
+            const tpValue = document.getElementById('tpValue');
+            const tpHint = document.getElementById('tpHint');
+
+            // SL elements
+            const slMode = document.getElementById('slMode');
+            const slValue = document.getElementById('slValue');
+            const slHint = document.getElementById('slHint');
+
+            // Output fields
+            const tpPipsEl = document.getElementById('tpPips');
+            const tpPointsEl = document.getElementById('tpPoints');
+            const tpUsdEl = document.getElementById('tpUsd');
+            const tpPctNoLvEl = document.getElementById('tpPctNoLv');
+            const tpPctWithLvEl = document.getElementById('tpPctWithLv');
+
+            const slPipsEl = document.getElementById('slPips');
+            const slPointsEl = document.getElementById('slPoints');
+            const slUsdEl = document.getElementById('slUsd');
+            const slPctNoLvEl = document.getElementById('slPctNoLv');
+            const slPctWithLvEl = document.getElementById('slPctWithLv');
+
+            const directionBadge = document.getElementById('directionBadge');
+            const rrBadge = document.getElementById('rrBadge');
+
+            // ----- Config -----
+            const PIP_VALUE_PER_LOT = 10;
+            const CONTRACT_SIZE = 100000;
+
+            function getPipSize() {
+                const type = pairSelect.value;
+                if (type === 'jpy') return 0.01;
+                if (type === 'xau') return 0.1;
+                return 0.0001;
+            }
+
+            // ----- Helpers -----
+            function formatUsd(value) {
+                const sign = value > 0 ? '+' : (value < 0 ? '−' : '');
+                return sign + '$' + Math.abs(value).toFixed(2);
+            }
+
+            function formatNumberWithSign(value, isProfitSide) {
+                if (value === 0) return '0';
+                const sign = isProfitSide ? '+' : '−';
+                let numStr;
+                if (value >= 100) numStr = value.toFixed(0);
+                else if (value >= 10) numStr = value.toFixed(1);
+                else numStr = value.toFixed(2);
+                return sign + parseFloat(numStr).toString();
+            }
+
+            function formatPercent(value) {
+                const sign = value > 0 ? '+' : (value < 0 ? '−' : '');
+                const absValue = Math.abs(value);
+                let formatted;
+                if (absValue < 0.01) formatted = absValue.toFixed(3);
+                else if (absValue < 1) formatted = absValue.toFixed(2);
+                else formatted = absValue.toFixed(1);
+                return sign + parseFloat(formatted).toString() + '%';
+            }
+
+            // Update hints based on mode
+            function updateHints() {
+                if (tpMode.value === 'price') tpHint.textContent = 'Enter target price (e.g. 1.0900)';
+                else if (tpMode.value === 'pip') tpHint.textContent = 'Enter pip distance (e.g. 50 for +50 pips)';
+                else tpHint.textContent = 'Enter % move (e.g. 0.5 for +0.5%)';
+
+                if (slMode.value === 'price') slHint.textContent = 'Enter stop price (e.g. 1.0820)';
+                else if (slMode.value === 'pip') slHint.textContent = 'Enter pip distance (e.g. 30 for −30 pips)';
+                else slHint.textContent = 'Enter % move (e.g. 0.3 for −0.3%)';
+            }
+
+            // ----- Core calculation -----
+            function updatePnL() {
+                // Read & sanitize
+                let lot = parseFloat(lotInput.value);
+                let entry = parseFloat(entryInput.value);
+                let leverage = parseFloat(leverageInput.value);
+                const pipSize = getPipSize();
+
+                if (isNaN(lot) || lot <= 0) lot = 0.10;
+                if (isNaN(entry) || entry === 0) entry = 1.0850;
+                if (isNaN(leverage) || leverage < 1) leverage = 100;
+
+                // --- Determine TP price ---
+                let tpRaw = parseFloat(tpValue.value);
+                let tpPrice;
+                if (isNaN(tpRaw)) tpRaw = 0;
+
+                // --- Determine SL price ---
+                let slRaw = parseFloat(slValue.value);
+                let slPrice;
+                if (isNaN(slRaw)) slRaw = 0;
+
+                // Determine direction using price modes if available
+                let direction = 'LONG';
+                if (tpMode.value === 'price' && !isNaN(tpRaw)) {
+                    if (tpRaw > entry) direction = 'LONG';
+                    else if (tpRaw < entry) direction = 'SHORT';
+                } else if (slMode.value === 'price' && !isNaN(slRaw)) {
+                    if (slRaw < entry) direction = 'LONG';
+                    else if (slRaw > entry) direction = 'SHORT';
+                } else {
+                    // both pip or percent: use sign heuristics
+                    if (tpMode.value === 'pip' || tpMode.value === 'percent') {
+                        if (tpRaw < 0) direction = 'SHORT';
+                        else if (slRaw < 0) direction = 'LONG';
+                        else direction = 'LONG'; // default long
+                    }
+                }
+                directionBadge.textContent = direction;
+
+                // Compute actual TP price
+                if (tpMode.value === 'price') {
+                    tpPrice = tpRaw;
+                } else if (tpMode.value === 'pip') {
+                    const pipDist = Math.abs(tpRaw);
+                    tpPrice = direction === 'LONG' ? entry + pipDist * pipSize : entry - pipDist * pipSize;
+                } else { // percent
+                    const pct = Math.abs(tpRaw) / 100;
+                    tpPrice = direction === 'LONG' ? entry * (1 + pct) : entry * (1 - pct);
+                }
+
+                // Compute actual SL price
+                if (slMode.value === 'price') {
+                    slPrice = slRaw;
+                } else if (slMode.value === 'pip') {
+                    const pipDist = Math.abs(slRaw);
+                    slPrice = direction === 'LONG' ? entry - pipDist * pipSize : entry + pipDist * pipSize;
+                } else { // percent
+                    const pct = Math.abs(slRaw) / 100;
+                    slPrice = direction === 'LONG' ? entry * (1 - pct) : entry * (1 + pct);
+                }
+
+                // Handle edge: if tpPrice or slPrice invalid
+                if (isNaN(tpPrice)) tpPrice = entry;
+                if (isNaN(slPrice)) slPrice = entry;
+
+                // ---- Distances ----
+                const tpDist = Math.abs(tpPrice - entry);
+                const slDist = Math.abs(slPrice - entry);
+
+                const tpPips = tpDist / pipSize;
+                const slPips = slDist / pipSize;
+                const tpPoints = tpPips * 10;
+                const slPoints = slPips * 10;
+
+                // ---- USD P&L ----
+                const pipValueForLot = PIP_VALUE_PER_LOT * lot;
+                const tpUsdRaw = tpPips * pipValueForLot;
+                const slUsdRaw = slPips * pipValueForLot;
+                const tpUsd = tpUsdRaw;
+                const slUsd = -slUsdRaw;
+
+                // ---- Percentages ----
+                const notionalUSD = lot * CONTRACT_SIZE;
+                const marginUsed = notionalUSD / leverage;
+                let tpPctNoLv = 0, slPctNoLv = 0, tpPctWithLv = 0, slPctWithLv = 0;
+                if (notionalUSD > 0) {
+                    tpPctNoLv = (tpUsd / notionalUSD) * 100;
+                    slPctNoLv = (slUsd / notionalUSD) * 100;
+                }
+                if (marginUsed > 0) {
+                    tpPctWithLv = (tpUsd / marginUsed) * 100;
+                    slPctWithLv = (slUsd / marginUsed) * 100;
+                }
+
+                // ---- R:R Calculation ----
+                let rrText = '—';
+                if (slPips > 0.0001) {
+                    const rewardRisk = tpPips / slPips;
+                    // Format as "2.00 : 1"
+                    rrText = rewardRisk.toFixed(2) + ' : 1';
+                } else if (tpPips > 0.0001) {
+                    rrText = '∞ : 1';
+                } else {
+                    rrText = '—';
+                }
+                rrBadge.textContent = 'R:R ' + rrText;
+
+                // ---- Update DOM ----
+                tpPipsEl.textContent = formatNumberWithSign(tpPips, true) + ' pips';
+                tpPointsEl.textContent = formatNumberWithSign(tpPoints, true) + ' pts';
+                tpUsdEl.textContent = formatUsd(tpUsd);
+                tpPctNoLvEl.textContent = formatPercent(tpPctNoLv);
+                tpPctWithLvEl.textContent = formatPercent(tpPctWithLv);
+
+                slPipsEl.textContent = formatNumberWithSign(slPips, false) + ' pips';
+                slPointsEl.textContent = formatNumberWithSign(slPoints, false) + ' pts';
+                slUsdEl.textContent = formatUsd(slUsd);
+                slPctNoLvEl.textContent = formatPercent(slPctNoLv);
+                slPctWithLvEl.textContent = formatPercent(slPctWithLv);
+
+                // Colour classes
+                const tpPositive = tpPips > 0.0001;
+                tpPipsEl.className = tpPositive ? 'value profit' : 'value neutral';
+                tpPointsEl.className = tpPositive ? 'value profit' : 'value neutral';
+                tpUsdEl.className = tpPositive ? 'value profit' : 'value neutral';
+                tpPctNoLvEl.className = tpPositive ? 'value profit' : 'value neutral';
+                tpPctWithLvEl.className = tpPositive ? 'value profit' : 'value neutral';
+
+                const slNegative = slPips > 0.0001;
+                slPipsEl.className = slNegative ? 'value loss' : 'value neutral';
+                slPointsEl.className = slNegative ? 'value loss' : 'value neutral';
+                slUsdEl.className = slNegative ? 'value loss' : 'value neutral';
+                slPctNoLvEl.className = slNegative ? 'value loss' : 'value neutral';
+                slPctWithLvEl.className = slNegative ? 'value loss' : 'value neutral';
+
+                if (!tpPositive) {
+                    tpPipsEl.textContent = '0 pips'; tpPointsEl.textContent = '0 pts'; tpUsdEl.textContent = '$0.00';
+                    tpPctNoLvEl.textContent = '0%'; tpPctWithLvEl.textContent = '0%';
+                }
+                if (!slNegative) {
+                    slPipsEl.textContent = '0 pips'; slPointsEl.textContent = '0 pts'; slUsdEl.textContent = '$0.00';
+                    slPctNoLvEl.textContent = '0%'; slPctWithLvEl.textContent = '0%';
+                }
+            }
+
+            // ----- Event listeners -----
+            const inputs = [lotInput, entryInput, pairSelect, leverageInput, tpMode, tpValue, slMode, slValue];
+            inputs.forEach(el => {
+                el.addEventListener('input', () => { updateHints(); updatePnL(); });
+                el.addEventListener('change', () => { updateHints(); updatePnL(); });
+            });
+
+            // Initial update
+            updateHints();
+            updatePnL();
+        })();
+    </script>
+</body>
+</html>
